@@ -1,20 +1,39 @@
+const ApiError = require('../errors/ApiError');
 const User = require('../models/user');
 
-module.exports.getUsers = (_, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ users }))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+    .catch(() => next(ApiError.internal()));
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .then((user) => res.send(user))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+    .then((user) => {
+      if (!user) {
+        next(ApiError.notFound('Пользователь по указанному id не найден'));
+        return;
+      }
+      res.send(user);
+    })
+    .catch(() => next(ApiError.internal()));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+  const newUser = new User({
+    name,
+    about,
+    avatar,
+  });
+  newUser
+    .validate()
+    .then(() => {
+      User.create(newUser)
+        .then((user) => res.send(user))
+        .catch(() => next(ApiError.internal()));
+    })
+    .catch(() => {
+      next(ApiError.badRequest('Переданы некорректные данные при создании пользователя'));
+    });
 };
