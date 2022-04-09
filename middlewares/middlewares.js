@@ -1,4 +1,4 @@
-const ApiError = require('../errors/ApiError');
+const HttpError = require('../errors/HttpError');
 
 module.exports.setUserId = (req, res, next) => {
   req.user = {
@@ -8,11 +8,11 @@ module.exports.setUserId = (req, res, next) => {
   next();
 };
 
-module.exports.apiErrorHandler = (err, req, res, next) => {
-  if (err instanceof ApiError) {
+module.exports.httpErrorHandler = (err, req, res, next) => {
+  if (err instanceof HttpError) {
     res.status(err.statusCode).send({ message: err.message });
     return;
   }
 
-  res.status(500).send({ message: ApiError.internal().message });
+  res.status(500).send({ message: HttpError.internal().message });
 };
