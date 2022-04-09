@@ -8,11 +8,11 @@ module.exports.setUserId = (req, res, next) => {
   next();
 };
 
-module.exports.apiHandlerError = (err, req, res, next) => {
+module.exports.apiErrorHandler = (err, req, res, next) => {
   if (err instanceof ApiError) {
     res.status(err.statusCode).send({ message: err.message });
     return;
   }
 
-  res.status(500).send({ message: 'Что-то пошло не так' });
+  res.status(500).send({ message: ApiError.internal().message });
 };

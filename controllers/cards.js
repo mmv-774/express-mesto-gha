@@ -1,20 +1,39 @@
+const ApiError = require('../errors/ApiError');
 const Card = require('../models/card');
 
-module.exports.getCards = (_, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ cards }))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+    .catch(() => next(ApiError.internal()));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+  const newCard = new Card({
+    name,
+    link,
+    owner: req.user._id,
+  });
+  newCard
+    .validate()
+    .then(() => {
+      Card.create(newCard)
+        .then((card) => res.send(card))
+        .catch(() => next(ApiError.internal()));
+    })
+    .catch(() => {
+      next(ApiError.badRequest('Переданы некорректные данные при создании карточки'));
+    });
 };
 
-module.exports.deleteCardById = (req, res) => {
+module.exports.deleteCardById = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send(card))
-    .catch(() => res.status(500).send({ message: 'Что-то пошло не так' }));
+    .then((card) => {
+      if (!card) {
+        next(ApiError.notFound(' Карточка с указанным id не найдена'));
+        return;
+      }
+      res.send(card);
+    })
+    .catch(() => next(ApiError.internal()));
 };

@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { setUserId, apiHandlerError } = require('./middlewares/middlewares');
+const { setUserId, apiErrorHandler } = require('./middlewares/middlewares');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
@@ -14,7 +14,7 @@ app.use(setUserId);
 app.use(bodyParser.json());
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
-app.use(apiHandlerError);
+app.use(apiErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`App start on ${PORT} port`);
