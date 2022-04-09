@@ -21,19 +21,43 @@ module.exports.getUserById = (req, res, next) => {
 
 module.exports.createUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
-  const newUser = new User({
+  const model = new User({
     name,
     about,
     avatar,
   });
-  newUser
+  model
     .validate()
     .then(() => {
-      User.create(newUser)
+      User.create(model)
         .then((user) => res.send(user))
         .catch(() => next(HttpError.internal()));
     })
     .catch(() => {
       next(HttpError.badRequest('Переданы некорректные данные при создании пользователя'));
+    });
+};
+
+module.exports.patchUserBio = (req, res, next) => {
+  const { name, about } = req.body;
+  const model = new User({
+    name,
+    about,
+  });
+  model
+    .validate({ validateModifiedOnly: true })
+    .then(() => {
+      User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+        .then((user) => {
+          if (!user) {
+            next(HttpError.notFound('Пользователь по указанному id не найден'));
+            return;
+          }
+          res.send(user);
+        })
+        .catch(() => next(HttpError.internal()));
+    })
+    .catch(() => {
+      next(HttpError.badRequest('Переданы некорректные данные при обновлении профиля'));
     });
 };

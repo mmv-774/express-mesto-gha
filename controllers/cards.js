@@ -9,15 +9,15 @@ module.exports.getCards = (req, res, next) => {
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const newCard = new Card({
+  const model = new Card({
     name,
     link,
     owner: req.user._id,
   });
-  newCard
+  model
     .validate()
     .then(() => {
-      Card.create(newCard)
+      Card.create(model)
         .then((card) => res.send(card))
         .catch(() => next(HttpError.internal()));
     })
