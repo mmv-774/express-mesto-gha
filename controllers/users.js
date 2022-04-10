@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongoose').Types;
 const HttpError = require('../errors/HttpError');
 const User = require('../models/user');
 
@@ -8,15 +9,19 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        next(HttpError.notFound('Пользователь по указанному id не найден'));
-        return;
-      }
-      res.send(user);
-    })
-    .catch(() => next(HttpError.internal()));
+  if (ObjectId.isValid(req.params.userId)) {
+    User.findById(req.params.userId)
+      .then((user) => {
+        if (!user) {
+          next(HttpError.notFound('Пользователь по указанному id не найден'));
+          return;
+        }
+        res.send(user);
+      })
+      .catch(() => next(HttpError.internal()));
+  } else {
+    next(HttpError.badRequest('Переданы некорректные данные для получения пользователя'));
+  }
 };
 
 module.exports.createUser = (req, res, next) => {
