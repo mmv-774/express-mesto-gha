@@ -45,26 +45,10 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.patchUserBio = (req, res, next) => {
   const { name, about } = req.body;
-  const model = new User({
-    name,
-    about,
-  });
-  model
-    .validate({ validateModifiedOnly: true })
-    .then(() => {
-      User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
-        .then((user) => {
-          if (!user) {
-            next(HttpError.notFound('Пользователь по указанному id не найден'));
-            return;
-          }
-          res.send(user);
-        })
-        .catch(() => next(HttpError.internal()));
-    })
-    .catch(() => {
-      next(HttpError.badRequest('Переданы некорректные данные при обновлении профиля'));
-    });
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+    .orFail(HttpError.notFound('Пользователь по указанному id не найден'))
+    .then((user) => res.send(user))
+    .catch((err) => next(HttpError.badRequest('Переданы некорректные данные при обновлении профиля')));
 };
 
 module.exports.patchUserAvatar = (req, res, next) => {
