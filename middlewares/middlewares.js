@@ -2,7 +2,7 @@ const HttpError = require('../errors/HttpError');
 
 module.exports.setUserId = (req, res, next) => {
   req.user = {
-    _id: '624e9faa492b32e52b32922f',
+    _id: '62527de35ee354cddd8117cf',
   };
 
   next();
