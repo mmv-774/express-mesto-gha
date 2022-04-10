@@ -55,7 +55,7 @@ module.exports.patchUserBio = (req, res, next) => {
       User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
         .then((user) => {
           if (!user) {
-            next(HttpError.badRequest('Пользователь по указанному id не найден'));
+            next(HttpError.notFound('Пользователь по указанному id не найден'));
             return;
           }
           res.send(user);
