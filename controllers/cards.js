@@ -50,7 +50,7 @@ module.exports.deleteCardById = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  if (ObjectId.isValid(req.user._id)) {
+  if (ObjectId.isValid(req.user._id) && ObjectId.isValid(req.params.cardId)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
@@ -69,7 +69,7 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  if (ObjectId.isValid(req.user._id)) {
+  if (ObjectId.isValid(req.user._id) && ObjectId.isValid(req.params.cardId)) {
     Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
