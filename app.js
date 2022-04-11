@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { setUserId, httpErrorHandler } = require('./middlewares/middlewares');
+const { setUserId, notFoundErrorHandler, httpErrorHandler } = require('./middlewares/middlewares');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
@@ -14,6 +14,7 @@ app.use(setUserId);
 app.use(bodyParser.json());
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
+app.use('*', notFoundErrorHandler);
 app.use(httpErrorHandler);
 
 app.listen(PORT, () => {
