@@ -1,10 +1,15 @@
 const { DocumentNotFoundError, ValidationError, CastError } = require('mongoose').Error;
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { duplicateKeyError } = require('../errors/errorConstants');
 const HttpError = require('../errors/HttpError');
 const User = require('../models/user');
 
 const userQueryErrorHandler = (error, next, messages = {}) => {
+  if (error instanceof HttpError) {
+    next(error);
+    return;
+  }
   if (error instanceof DocumentNotFoundError) {
     next(HttpError.notFound(messages.documentNotFound || 'Пользователь по указанному id не найден'));
     return;
@@ -18,6 +23,21 @@ const userQueryErrorHandler = (error, next, messages = {}) => {
     return;
   }
   next(HttpError.internal(messages.internal));
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .send({ message: 'Успешная авторизация' });
+    })
+    .catch((error) => userQueryErrorHandler(error, next));
 };
 
 module.exports.getUsers = (req, res, next) => {

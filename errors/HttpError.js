@@ -9,6 +9,10 @@ class HttpError extends Error {
     return new HttpError(400, 'BadRequestError', message);
   }
 
+  static unauthorized(message) {
+    return new HttpError(401, 'UnauthorizedError', message);
+  }
+
   static notFound(message) {
     return new HttpError(404, 'NotFoundError', message);
   }
