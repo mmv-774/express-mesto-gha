@@ -1,13 +1,5 @@
 const HttpError = require('../errors/HttpError');
 
-module.exports.setUserId = (req, res, next) => {
-  req.user = {
-    _id: '625438d4f3c67a5ca13f8796',
-  };
-
-  next();
-};
-
 module.exports.httpErrorHandler = (err, req, res, next) => {
   if (err instanceof HttpError) {
     res.status(err.statusCode).send({ message: err.message });
