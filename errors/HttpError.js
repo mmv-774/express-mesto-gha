@@ -13,6 +13,10 @@ class HttpError extends Error {
     return new HttpError(401, 'UnauthorizedError', message);
   }
 
+  static forbidden(message) {
+    return new HttpError(403, 'ForbiddenError', message);
+  }
+
   static notFound(message) {
     return new HttpError(404, 'NotFoundError', message);
   }
