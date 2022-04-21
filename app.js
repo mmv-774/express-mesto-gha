@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { setUserId, notFoundErrorHandler, httpErrorHandler } = require('./middlewares/middlewares');
+const { login, createUser } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
@@ -12,6 +14,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(setUserId);
 app.use(bodyParser.json());
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 app.use('*', notFoundErrorHandler);
