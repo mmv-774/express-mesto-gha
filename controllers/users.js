@@ -1,5 +1,6 @@
 const { DocumentNotFoundError, ValidationError, CastError } = require('mongoose').Error;
 const bcrypt = require('bcryptjs');
+const { duplicateKeyError } = require('../errors/errorConstants');
 const HttpError = require('../errors/HttpError');
 const User = require('../models/user');
 
@@ -10,6 +11,10 @@ const userQueryErrorHandler = (error, next, messages = {}) => {
   }
   if (error instanceof ValidationError || error instanceof CastError) {
     next(HttpError.badRequest(messages.validation || 'Переданы некорректные данные'));
+    return;
+  }
+  if (error.constructor.name === duplicateKeyError.name && error.code === duplicateKeyError.code) {
+    next(HttpError.conflict(messages.conflict || 'Пользователь с такими данными уже существует'));
     return;
   }
   next(HttpError.internal(messages.internal));
@@ -37,7 +42,10 @@ module.exports.createUser = (req, res, next) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send(user))
-    .catch((error) => userQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные при создании пользователя' }));
+    .catch((error) => userQueryErrorHandler(error, next, {
+      conflict: `Пользователь с таким ${Object.keys(error.keyValue)[0]} уже существует`,
+      validation: 'Переданы некорректные данные при создании пользователя',
+    }));
 };
 
 module.exports.patchUserBio = (req, res, next) => {

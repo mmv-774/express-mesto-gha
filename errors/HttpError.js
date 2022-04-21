@@ -13,6 +13,10 @@ class HttpError extends Error {
     return new HttpError(404, 'NotFoundError', message);
   }
 
+  static conflict(message) {
+    return new HttpError(409, 'ConflictError', message);
+  }
+
   static internal(message = 'Что-то пошло нет так') {
     return new HttpError(500, 'InternalError', message);
   }
