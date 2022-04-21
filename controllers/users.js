@@ -26,6 +26,13 @@ const userQueryErrorHandler = (error, next, messages = {}) => {
   next(HttpError.internal(messages.internal));
 };
 
+const getUserById = (id, req, res, next) => {
+  User.findById(id)
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((error) => userQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные для получения пользователя' }));
+};
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
@@ -52,10 +59,11 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  User.findById(req.params.userId)
-    .orFail()
-    .then((user) => res.send(user))
-    .catch((error) => userQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные при создании пользователя' }));
+  getUserById(req.params.userId, req, res, next);
+};
+
+module.exports.getUser = (req, res, next) => {
+  getUserById(req.user._id, req, res, next);
 };
 
 module.exports.createUser = (req, res, next) => {
