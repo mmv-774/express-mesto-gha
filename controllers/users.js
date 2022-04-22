@@ -20,7 +20,7 @@ const userQueryErrorHandler = (error, next, messages = {}) => {
     return;
   }
   if (error.constructor.name === duplicateKeyError.name && error.code === duplicateKeyError.code) {
-    next(HttpError.conflict(messages.conflict || 'Пользователь с такими данными уже существует'));
+    next(HttpError.conflict(messages.conflict || `Пользователь с таким ${Object.keys(error.keyValue)[0]} уже существует`));
     return;
   }
   next(HttpError.internal(messages.internal));
@@ -76,7 +76,6 @@ module.exports.createUser = (req, res, next) => {
     }))
     .then((user) => res.send(user))
     .catch((error) => userQueryErrorHandler(error, next, {
-      conflict: `Пользователь с таким ${Object.keys(error.keyValue)[0]} уже существует`,
       validation: 'Переданы некорректные данные при создании пользователя',
     }));
 };
