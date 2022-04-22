@@ -3,6 +3,10 @@ const HttpError = require('../errors/HttpError');
 const Card = require('../models/card');
 
 const cardQueryErrorHandler = (error, next, messages = {}) => {
+  if (error instanceof HttpError) {
+    next(error);
+    return;
+  }
   if (error instanceof DocumentNotFoundError) {
     next(HttpError.notFound(messages.documentNotFound || 'Карточка с указанным id не найдена'));
     return;
@@ -28,10 +32,16 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCardById = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .orFail()
-    .then((card) => res.send(card))
-    .catch((error) => cardQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные при удаления карточки' }));
+    .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        throw HttpError.forbidden('Нельзя удалять чужие карточки');
+      }
+      Card.deleteOne({ card });
+      res.send(card);
+    })
+    .catch((error) => cardQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные для удаления карточки' }));
 };
 
 module.exports.likeCard = (req, res, next) => {
