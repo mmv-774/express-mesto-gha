@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const { celebrate } = require('celebrate');
+const { getUserByIdSchema, patchUserBioSchema, patchUserAvatarSchema } = require('../middlewares/validatior');
 
 const {
   getUsers, getUserById, getUser, patchUserBio, patchUserAvatar,
@@ -6,8 +8,8 @@ const {
 
 router.get('/', getUsers);
 router.get('/me', getUser);
-router.get('/:userId', getUserById);
-router.patch('/me', patchUserBio);
-router.patch('/me/avatar', patchUserAvatar);
+router.get('/:userId', celebrate(getUserByIdSchema), getUserById);
+router.patch('/me', celebrate(patchUserBioSchema), patchUserBio);
+router.patch('/me/avatar', celebrate(patchUserAvatarSchema), patchUserAvatar);
 
 module.exports = router;
