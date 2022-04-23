@@ -21,7 +21,7 @@ app.post('/signup', celebrate(signUpSchema), createUser);
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
 app.use('*', notFoundErrorHandler);
-app.use(errors);
+app.use(errors());
 app.use(httpErrorHandler);
 
 app.listen(PORT);
