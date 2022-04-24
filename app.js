@@ -22,7 +22,7 @@ app.post('/signin', celebrate(signInSchema), login);
 app.post('/signup', celebrate(signUpSchema), createUser);
 app.use('/users', auth, userRouter);
 app.use('/cards', auth, cardRouter);
-app.use('*', notFoundErrorHandler);
+app.use('*', auth, notFoundErrorHandler);
 app.use(errors());
 app.use(httpErrorHandler);
 

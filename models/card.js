@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { urlRegex } = require('../middlewares/validator');
 
 const schema = new mongoose.Schema(
   {
@@ -10,6 +11,10 @@ const schema = new mongoose.Schema(
     },
     link: {
       type: String,
+      validate: {
+        validator: (v) => urlRegex.test(v),
+        message: 'Некорректная ссылка на изображение карточки',
+      },
       required: true,
     },
     owner: {
