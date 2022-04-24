@@ -38,8 +38,7 @@ module.exports.deleteCardById = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw HttpError.forbidden('Нельзя удалять чужие карточки');
       }
-      Card.deleteOne({ card });
-      res.send(card);
+      Card.deleteOne({ card }).then(() => res.send(card));
     })
     .catch((error) => cardQueryErrorHandler(error, next, { validation: 'Переданы некорректные данные для удаления карточки' }));
 };
